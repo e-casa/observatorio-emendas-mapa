@@ -19,21 +19,35 @@ export function useEmendasData() {
         const jsonData = XLSX.utils.sheet_to_json(worksheet) as EmendasData[];
         
         // Limpar e normalizar dados
-        const cleanedData = jsonData.map(row => ({
-          ...row,
-          VL_Emendas_Parlamentares: Number(row.VL_Emendas_Parlamentares) || 0,
-          População_Residente: Number(row.População_Residente) || 0,
-          Taxa_de_Desemprego: Number(row.Taxa_de_Desemprego) || 0,
-          Quociente_Locacional_Cultura: Number(row.Quociente_Locacional_Cultura) || 0,
-          PIB_Estadual: Number(row.PIB_Estadual) || 0,
-          Gastos_Cultura: Number(row.Gastos_Cultura) || 0,
-          IDH_Educação: Number(row.IDH_Educação) || 0,
-          IDH_Longevidade: Number(row.IDH_Longevidade) || 0,
-          IDH_Renda: Number(row.IDH_Renda) || 0,
-          Emendas_Per_Capita: Number(row.Emendas_Per_Capita) || 0,
-          PIB_Per_Capita: Number(row.PIB_Per_Capita) || 0,
-          Ano: Number(row.Ano),
-        }));
+        const cleanedData = jsonData
+          .filter(row => row.Estado && row.Ano) // Remover linhas inválidas
+          .map(row => {
+            const populacao = Number(row.População_Residente) || 0;
+            const emendas = Number(row.VL_Emendas_Parlamentares) || 0;
+            const pib = Number(row.PIB_Estadual) || 0;
+            
+            // Calcular per capita corretamente (o Excel tem valores estranhos)
+            const emendasPerCapita = populacao > 0 ? emendas / populacao : 0;
+            const pibPerCapita = populacao > 0 ? pib / populacao : 0;
+            
+            return {
+              ...row,
+              Estado: String(row.Estado).trim(),
+              Região: String(row.Região || '').trim(),
+              VL_Emendas_Parlamentares: emendas,
+              População_Residente: populacao,
+              Taxa_de_Desemprego: Number(row.Taxa_de_Desemprego) || 0,
+              Quociente_Locacional_Cultura: Number(row.Quociente_Locacional_Cultura) || 0,
+              PIB_Estadual: pib,
+              Gastos_Cultura: Number(row.Gastos_Cultura) || 0,
+              IDH_Educação: Number(row.IDH_Educação) || 0,
+              IDH_Longevidade: Number(row.IDH_Longevidade) || 0,
+              IDH_Renda: Number(row.IDH_Renda) || 0,
+              Emendas_Per_Capita: emendasPerCapita,
+              PIB_Per_Capita: pibPerCapita,
+              Ano: Number(row.Ano),
+            };
+          });
         
         setData(cleanedData);
         setLoading(false);
