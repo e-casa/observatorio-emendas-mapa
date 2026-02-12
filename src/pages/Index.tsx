@@ -1,18 +1,12 @@
 import { useState } from 'react';
-import { OverviewDashboard } from '@/components/OverviewDashboard';
-import { MapExplorer } from '@/components/MapExplorer';
-import { CorrelationPanel } from '@/components/CorrelationPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BarChart3, 
-  Map, 
-  GitCompare, 
-  Landmark,
-  ExternalLink
-} from 'lucide-react';
+import { Landmark, BarChart3, ArrowRightLeft, Grid3X3 } from 'lucide-react';
+import PainelDados from './PainelDados';
+import AnaliseComparativa from './AnaliseComparativa';
+import HeatmapsMapas from './HeatmapsMapas';
 
 const Index = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('dados');
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,68 +26,56 @@ const Index = () => {
               </p>
             </div>
           </div>
-          
           <div className="flex flex-wrap gap-3 mt-6">
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-sm">
-              <span className="opacity-70">Período:</span>{' '}
-              <span className="font-medium">2014 - 2024</span>
+              <span className="opacity-70">Período:</span> <span className="font-medium">2014 – 2024</span>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-sm">
-              <span className="opacity-70">Estados:</span>{' '}
-              <span className="font-medium">27 Unidades Federativas</span>
+              <span className="opacity-70">Estados:</span> <span className="font-medium">27 UFs</span>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2 text-sm">
-              <span className="opacity-70">Variáveis:</span>{' '}
-              <span className="font-medium">11 Indicadores</span>
+              <span className="opacity-70">Variáveis:</span> <span className="font-medium">11 Indicadores</span>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Navigation Tabs */}
+      {/* Tab Navigation */}
       <div className="border-b border-border bg-card sticky top-0 z-50 shadow-sm">
         <div className="container">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="h-14 w-full justify-start bg-transparent border-0 rounded-none gap-2">
-              <TabsTrigger 
-                value="overview" 
-                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3 gap-2"
-              >
+              <TabsTrigger value="dados"
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3 gap-2">
                 <BarChart3 className="w-4 h-4" />
-                <span className="hidden sm:inline">Visão Geral</span>
+                <span className="hidden sm:inline">Painel de Dados</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="explorer" 
-                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3 gap-2"
-              >
-                <Map className="w-4 h-4" />
-                <span className="hidden sm:inline">Explorar Mapa</span>
+              <TabsTrigger value="comparativo"
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3 gap-2">
+                <ArrowRightLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Análise Comparativa</span>
               </TabsTrigger>
-              <TabsTrigger 
-                value="correlation" 
-                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3 gap-2"
-              >
-                <GitCompare className="w-4 h-4" />
-                <span className="hidden sm:inline">Correlação</span>
+              <TabsTrigger value="heatmaps"
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3 gap-2">
+                <Grid3X3 className="w-4 h-4" />
+                <span className="hidden sm:inline">Heatmaps & Mapas</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Content */}
       <main className="container py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="overview" className="mt-0 animate-fade-in">
-            <OverviewDashboard />
+          <TabsContent value="dados" className="mt-0 animate-fade-in">
+            <PainelDados />
           </TabsContent>
-          
-          <TabsContent value="explorer" className="mt-0 animate-fade-in">
-            <MapExplorer />
+          <TabsContent value="comparativo" className="mt-0 animate-fade-in">
+            <AnaliseComparativa />
           </TabsContent>
-          
-          <TabsContent value="correlation" className="mt-0 animate-fade-in">
-            <CorrelationPanel />
+          <TabsContent value="heatmaps" className="mt-0 animate-fade-in">
+            <HeatmapsMapas />
           </TabsContent>
         </Tabs>
       </main>
@@ -108,11 +90,7 @@ const Index = () => {
                 Observatório das Emendas • Dados consolidados para pesquisa acadêmica
               </span>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-xs text-muted-foreground">
-                Desenvolvido com dados públicos
-              </span>
-            </div>
+            <span className="text-xs text-muted-foreground">Desenvolvido com dados públicos</span>
           </div>
         </div>
       </footer>
