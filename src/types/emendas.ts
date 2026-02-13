@@ -13,7 +13,49 @@ export interface EmendasData {
   IDH_Renda: number;
   Emendas_Per_Capita: number;
   PIB_Per_Capita: number;
+  Vinculos_Empregos_Criativos: number;
+  Total_Vinculos_Empregos: number;
 }
+
+// Dados da aba correl_dados (resumo por estado)
+export interface CorrelDadosRow {
+  Estado: string;
+  Região: string;
+  Emendas_x_Desemprego: number;
+  Emendas_x_QL_Cultura: number;
+  Emendas_x_Gastos_Cultura: number;
+  Emendas_x_Empregos_Criativos: number;
+  Emendas_x_Empregos_Total: number;
+  Gastos_Cultura_x_Empregos_Criativos: number;
+  Media_Emenda_Periodo: number;
+  Media_Empregos_Criativos: number;
+  Media_Empregos_Bruto: number;
+}
+
+// Dados da aba base_trabalhada (séries temporais de correlações)
+export interface BaseTrabalhada {
+  Estado: string;
+  Ano: number;
+  Região: string;
+  Emendas_x_Desemprego: number;
+  Emendas_x_QL_Cultura: number;
+  Emendas_x_Gastos_Cultura: number;
+  Emendas_x_Empregos_Criativos: number;
+  Emendas_x_Empregos_Total: number;
+  Gastos_Cultura_x_Empregos_Criativos: number;
+  Media_Emenda_Periodo: number;
+  Media_Empregos_Criativos: number;
+  Media_Empregos_Bruto: number;
+}
+
+export const CORRELATION_PAIRS = [
+  { key: 'Emendas_x_Desemprego', label: 'Emendas × Desemprego' },
+  { key: 'Emendas_x_QL_Cultura', label: 'Emendas × QL Cultura' },
+  { key: 'Emendas_x_Gastos_Cultura', label: 'Emendas × Gastos Cultura' },
+  { key: 'Emendas_x_Empregos_Criativos', label: 'Emendas × Empregos Criativos' },
+  { key: 'Emendas_x_Empregos_Total', label: 'Emendas × Empregos Total' },
+  { key: 'Gastos_Cultura_x_Empregos_Criativos', label: 'Gastos Cultura × Empregos Criativos' },
+] as const;
 
 export interface VariableInfo {
   key: keyof EmendasData;
@@ -100,7 +142,21 @@ export const VARIABLES: VariableInfo[] = [
     format: (v) => `R$ ${v.toFixed(2)}`,
     description: 'Produto Interno Bruto dividido pela população',
     unit: 'R$ por habitante'
-  }
+  },
+  {
+    key: 'Vinculos_Empregos_Criativos',
+    label: 'Empregos Criativos',
+    format: (v) => v ? v.toLocaleString('pt-BR') : '—',
+    description: 'Vínculos de empregos criativos no estado (2017-2023)',
+    unit: 'Vínculos'
+  },
+  {
+    key: 'Total_Vinculos_Empregos',
+    label: 'Empregos Total (Bruto)',
+    format: (v) => v ? v.toLocaleString('pt-BR') : '—',
+    description: 'Total de vínculos de empregos no estado (2014-2021)',
+    unit: 'Vínculos'
+  },
 ];
 
 export const STATES_INFO: Record<string, { name: string; region: string; abbr: string }> = {

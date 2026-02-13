@@ -5,25 +5,43 @@ import { ScatterPlot } from '@/components/ScatterPlot';
 import { VariableSelector } from '@/components/VariableSelector';
 import { StateSelector } from '@/components/StateSelector';
 import { RegionSelector } from '@/components/RegionSelector';
-import { VARIABLES, STATES_INFO, REGION_COLORS, type EmendasData } from '@/types/emendas';
+import { VARIABLES, STATES_INFO, REGION_COLORS, CORRELATION_PAIRS, type EmendasData, type CorrelDadosRow } from '@/types/emendas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
-import { GitCompare, AlertCircle, Lightbulb, BarChart3, ArrowRightLeft } from 'lucide-react';
+import { GitCompare, AlertCircle, Lightbulb, BarChart3, ArrowRightLeft, Table2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+function getHeatColor(r: number): string {
+  if (r >= 0) {
+    const intensity = Math.min(r, 1);
+    return `rgb(${Math.round(255 - intensity * 155)},${Math.round(255 - intensity * 225)},${Math.round(255 - intensity * 215)})`;
+  } else {
+    const intensity = Math.min(Math.abs(r), 1);
+    return `rgb(${Math.round(255 - intensity * 215)},${Math.round(255 - intensity * 195)},${Math.round(255 - intensity * 105)})`;
+  }
+}
 
 export default function AnaliseComparativa() {
-  const { data, loading, getYears } = useEmendasData();
+  const { data, loading, getYears, correlDados, baseTrabalhada } = useEmendasData();
   const [variableX, setVariableX] = useState<string>('VL_Emendas_Parlamentares');
   const [variableY, setVariableY] = useState<string>('IDH_Educação');
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
   const [compareYear, setCompareYear] = useState<number | null>(null);
+  const [selectedCorrelPair, setSelectedCorrelPair] = useState<string>(CORRELATION_PAIRS[0].key);
 
   const years = getYears();
   const latestYear = years[years.length - 1];
 
-  // Filter data by region
+  // Filter data by region for scatter
   const filteredData = useMemo(() => {
     let d = data;
     if (selectedRegion && selectedRegion !== 'all') {
@@ -39,7 +57,7 @@ export default function AnaliseComparativa() {
     filterState: selectedState || undefined,
   });
 
-  // Comparative bar chart: variable X and Y for each state in a given year
+  // Comparative bar chart
   const comparisonData = useMemo(() => {
     const year = compareYear || latestYear;
     let yearData = data.filter(d => d.Ano === year);
@@ -52,15 +70,34 @@ export default function AnaliseComparativa() {
         fullName: d.Estado,
         regiao: d.Região,
         x: Number(d[variableX as keyof EmendasData]) || 0,
-        y: Number(d[variableY as keyof EmendasData]) || 0,
       }))
       .sort((a, b) => b.x - a.x);
-  }, [data, variableX, variableY, compareYear, latestYear, selectedRegion]);
+  }, [data, variableX, compareYear, latestYear, selectedRegion]);
+
+  // correl_dados table filtered by region
+  const correlDadosFiltered = useMemo(() => {
+    if (selectedRegion && selectedRegion !== 'all') {
+      return correlDados.filter(c => c.Região === selectedRegion);
+    }
+    return correlDados;
+  }, [correlDados, selectedRegion]);
+
+  // Time series of selected correlation pair for selected state
+  const correlTimeSeries = useMemo(() => {
+    if (!selectedState) return [];
+    return baseTrabalhada
+      .filter(d => d.Estado === selectedState)
+      .sort((a, b) => a.Ano - b.Ano)
+      .map(d => ({
+        year: d.Ano,
+        value: d[selectedCorrelPair as keyof typeof d] as number || 0,
+      }));
+  }, [baseTrabalhada, selectedState, selectedCorrelPair]);
 
   const xLabel = getVariableLabel(variableX as keyof EmendasData);
   const yLabel = getVariableLabel(variableY as keyof EmendasData);
   const varInfoX = VARIABLES.find(v => v.key === variableX);
-  const varInfoY = VARIABLES.find(v => v.key === variableY);
+  const selectedCorrelLabel = CORRELATION_PAIRS.find(p => p.key === selectedCorrelPair)?.label || '';
 
   if (loading) {
     return (
@@ -90,7 +127,7 @@ export default function AnaliseComparativa() {
         </CardContent>
       </Card>
 
-      {/* Correlation */}
+      {/* Correlation scatter */}
       <Card className="border-border/50 shadow-md">
         <CardHeader className="border-b border-border/50">
           <CardTitle className="flex items-center gap-2 text-xl font-serif">
@@ -99,7 +136,6 @@ export default function AnaliseComparativa() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-6">
-          {/* About */}
           <div className="bg-secondary/30 rounded-lg p-4">
             <div className="flex items-start gap-3">
               <Lightbulb className="w-5 h-5 text-primary mt-0.5" />
@@ -121,8 +157,6 @@ export default function AnaliseComparativa() {
           ) : correlationResult ? (
             <>
               <ScatterPlot result={correlationResult} variableX={variableX as keyof EmendasData} variableY={variableY as keyof EmendasData} />
-              
-              {/* Interpretation */}
               <div className="bg-primary/5 border border-primary/20 rounded-xl p-5">
                 <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
                   <Lightbulb className="w-4 h-4 text-primary" />
@@ -153,6 +187,113 @@ export default function AnaliseComparativa() {
           )}
         </CardContent>
       </Card>
+
+      {/* Pre-computed correlations table from correl_dados */}
+      <Card className="border-border/50 shadow-md">
+        <CardHeader className="border-b border-border/50">
+          <CardTitle className="flex items-center gap-2 text-xl font-serif">
+            <Table2 className="w-5 h-5 text-primary" />
+            Quadro de Correlações por Estado (correl_dados)
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left p-2 font-medium text-foreground sticky left-0 bg-card z-10">Estado</th>
+                  <th className="text-left p-2 font-medium text-foreground">Região</th>
+                  {CORRELATION_PAIRS.map(p => (
+                    <th key={p.key} className="text-center p-2 font-medium text-foreground whitespace-nowrap">{p.label}</th>
+                  ))}
+                  <th className="text-right p-2 font-medium text-foreground whitespace-nowrap">Média Emenda</th>
+                  <th className="text-right p-2 font-medium text-foreground whitespace-nowrap">Média Empr. Criat.</th>
+                  <th className="text-right p-2 font-medium text-foreground whitespace-nowrap">Média Empr. Bruto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {correlDadosFiltered.map(row => (
+                  <tr key={row.Estado} className="border-b border-border/30 hover:bg-secondary/20">
+                    <td className="p-2 font-medium text-foreground sticky left-0 bg-card z-10 whitespace-nowrap">
+                      {STATES_INFO[row.Estado]?.abbr || row.Estado}
+                    </td>
+                    <td className="p-2 text-muted-foreground">{row.Região}</td>
+                    {CORRELATION_PAIRS.map(p => {
+                      const val = row[p.key as keyof CorrelDadosRow] as number;
+                      return (
+                        <td key={p.key} className="text-center p-2">
+                          <span className="inline-block px-1.5 py-0.5 rounded font-mono text-[10px] font-bold"
+                            style={{
+                              backgroundColor: getHeatColor(val),
+                              color: Math.abs(val) > 0.5 ? 'white' : 'inherit',
+                            }}>
+                            {val.toFixed(2)}
+                          </span>
+                        </td>
+                      );
+                    })}
+                    <td className="text-right p-2 text-muted-foreground font-mono">R$ {(row.Media_Emenda_Periodo / 1e6).toFixed(1)}M</td>
+                    <td className="text-right p-2 text-muted-foreground font-mono">{row.Media_Empregos_Criativos.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</td>
+                    <td className="text-right p-2 text-muted-foreground font-mono">{row.Media_Empregos_Bruto.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Correlation time series from base_trabalhada */}
+      {selectedState && (
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader className="border-b border-border/50">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <CardTitle className="flex items-center gap-2 text-xl font-serif">
+                <GitCompare className="w-5 h-5 text-primary" />
+                Evolução da Correlação — {selectedState}
+              </CardTitle>
+              <div className="w-64">
+                <Select value={selectedCorrelPair} onValueChange={setSelectedCorrelPair}>
+                  <SelectTrigger className="bg-card border-border text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border">
+                    {CORRELATION_PAIRS.map(p => (
+                      <SelectItem key={p.key} value={p.key} className="text-xs">{p.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={correlTimeSeries}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
+                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }} />
+                  <YAxis domain={[-1, 1]} tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
+                    label={{ value: 'Correlação (r)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' } }} />
+                  <Tooltip content={({ active, payload, label }) => active && payload?.length ? (
+                    <div className="bg-card border border-border rounded-lg shadow-lg p-3">
+                      <p className="text-sm font-medium text-foreground">{label}</p>
+                      <p className="text-sm text-primary">{selectedCorrelLabel}: {(payload[0].value as number)?.toFixed(4)}</p>
+                    </div>
+                  ) : null} />
+                  <Bar dataKey="value" name={selectedCorrelLabel} radius={[4, 4, 0, 0]}>
+                    {correlTimeSeries.map((d, i) => (
+                      <Cell key={i} fill={d.value >= 0 ? 'hsl(120, 45%, 40%)' : 'hsl(350, 65%, 40%)'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Dados da aba <strong>base_trabalhada</strong> — valores de correlação por ano
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Comparative bar chart */}
       <Card className="border-border/50 shadow-sm">
@@ -204,7 +345,6 @@ export default function AnaliseComparativa() {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          {/* Region color legend */}
           <div className="flex flex-wrap gap-3 mt-3 justify-center">
             {Object.entries(REGION_COLORS).map(([region, color]) => (
               <div key={region} className="flex items-center gap-1.5">

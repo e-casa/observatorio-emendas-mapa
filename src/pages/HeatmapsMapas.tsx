@@ -4,15 +4,26 @@ import { CorrelationHeatmap } from '@/components/CorrelationHeatmap';
 import { LeafletMap } from '@/components/LeafletMap';
 import { VariableSelector } from '@/components/VariableSelector';
 import { RegionSelector } from '@/components/RegionSelector';
-import { VARIABLES, REGION_COLORS, STATES_INFO, type EmendasData } from '@/types/emendas';
+import { VARIABLES, REGION_COLORS, STATES_INFO, CORRELATION_PAIRS, type EmendasData, type CorrelDadosRow } from '@/types/emendas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend,
+  ResponsiveContainer, Tooltip,
 } from 'recharts';
 import { Grid3X3, Map, TrendingUp, Radar as RadarIcon } from 'lucide-react';
 
+function getHeatColor(r: number): string {
+  if (r >= 0) {
+    const intensity = Math.min(r, 1);
+    return `rgb(${Math.round(255 - intensity * 155)},${Math.round(255 - intensity * 225)},${Math.round(255 - intensity * 215)})`;
+  } else {
+    const intensity = Math.min(Math.abs(r), 1);
+    return `rgb(${Math.round(255 - intensity * 215)},${Math.round(255 - intensity * 195)},${Math.round(255 - intensity * 105)})`;
+  }
+}
+
 export default function HeatmapsMapas() {
-  const { data, loading, getYears } = useEmendasData();
+  const { data, loading, getYears, correlDados } = useEmendasData();
   const [mapVariable, setMapVariable] = useState<string>('Emendas_Per_Capita');
   const [mapYear, setMapYear] = useState<number | null>(null);
   const [heatmapRegion, setHeatmapRegion] = useState<string>('all');
@@ -45,8 +56,7 @@ export default function HeatmapsMapas() {
     const latestData = data.filter(d => d.Ano === latestYear);
     const regions = [...new Set(latestData.map(d => d.Região))];
     
-    // Normalize each variable to 0-100 for radar
-    const varsForRadar = ['VL_Emendas_Parlamentares', 'PIB_Estadual', 'IDH_Educação', 'Taxa_de_Desemprego', 'Gastos_Cultura'];
+    const varsForRadar = ['VL_Emendas_Parlamentares', 'PIB_Estadual', 'IDH_Educação', 'Taxa_de_Desemprego', 'Gastos_Cultura', 'Vinculos_Empregos_Criativos'];
     const maxVals: Record<string, number> = {};
     varsForRadar.forEach(v => {
       maxVals[v] = Math.max(...latestData.map(d => Number(d[v as keyof EmendasData]) || 0));
@@ -58,6 +68,7 @@ export default function HeatmapsMapas() {
       'IDH_Educação': 'IDH Edu.',
       'Taxa_de_Desemprego': 'Desemprego',
       'Gastos_Cultura': 'Gastos Cultura',
+      'Vinculos_Empregos_Criativos': 'Empr. Criativos',
     };
 
     return varsForRadar.map(v => {
@@ -87,6 +98,15 @@ export default function HeatmapsMapas() {
       }));
   }, [stateValues]);
 
+  // Heatmap from correl_dados (pre-computed correlations)
+  const correlHeatmapData = useMemo(() => {
+    let filtered = correlDados;
+    if (heatmapRegion && heatmapRegion !== 'all') {
+      filtered = filtered.filter(c => c.Região === heatmapRegion);
+    }
+    return filtered;
+  }, [correlDados, heatmapRegion]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -97,18 +117,72 @@ export default function HeatmapsMapas() {
 
   return (
     <div className="space-y-8">
-      {/* Correlation Heatmap */}
+      {/* Pre-computed Correlation Heatmap from correl_dados */}
       <Card className="border-border/50 shadow-md">
         <CardHeader className="border-b border-border/50">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <CardTitle className="flex items-center gap-2 text-xl font-serif">
               <Grid3X3 className="w-5 h-5 text-primary" />
-              Matriz de Correlação
+              Heatmap de Correlações (correl_dados)
             </CardTitle>
             <div className="w-48">
               <RegionSelector value={heatmapRegion} onValueChange={setHeatmapRegion} label="" placeholder="Todas" />
             </div>
           </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left p-2 font-medium text-foreground sticky left-0 bg-card z-10">Estado</th>
+                  {CORRELATION_PAIRS.map(p => (
+                    <th key={p.key} className="text-center p-2 font-medium text-foreground whitespace-nowrap text-[10px]">{p.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {correlHeatmapData.map(row => (
+                  <tr key={row.Estado} className="border-b border-border/20">
+                    <td className="p-2 font-medium text-foreground sticky left-0 bg-card z-10 whitespace-nowrap text-[11px]">
+                      {STATES_INFO[row.Estado]?.abbr || row.Estado}
+                    </td>
+                    {CORRELATION_PAIRS.map(p => {
+                      const val = row[p.key as keyof CorrelDadosRow] as number;
+                      return (
+                        <td key={p.key} className="text-center p-1.5">
+                          <span className="inline-block w-full px-1 py-1 rounded font-mono text-[10px] font-bold"
+                            style={{
+                              backgroundColor: getHeatColor(val),
+                              color: Math.abs(val) > 0.5 ? 'white' : 'inherit',
+                            }}>
+                            {val.toFixed(2)}
+                          </span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <span className="text-[10px] text-muted-foreground">−1.0 (inversa)</span>
+            <div className="w-48 h-3 rounded" style={{
+              background: 'linear-gradient(to right, rgb(40,60,150), rgb(255,255,255), rgb(100,30,40))'
+            }} />
+            <span className="text-[10px] text-muted-foreground">+1.0 (direta)</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calculated Correlation Matrix */}
+      <Card className="border-border/50 shadow-md">
+        <CardHeader className="border-b border-border/50">
+          <CardTitle className="flex items-center gap-2 text-xl font-serif">
+            <Grid3X3 className="w-5 h-5 text-primary" />
+            Matriz de Correlação (calculada dos dados brutos)
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <CorrelationHeatmap data={heatmapData} />

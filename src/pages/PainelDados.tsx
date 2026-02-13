@@ -12,11 +12,11 @@ import {
 } from 'recharts';
 import {
   TrendingUp, Users, Palette, GraduationCap, Building2,
-  BarChart3, PieChart as PieChartIcon, MapPin, Sparkles,
+  BarChart3, PieChart as PieChartIcon, MapPin, Sparkles, Briefcase,
 } from 'lucide-react';
 
 export default function PainelDados() {
-  const { data, loading, getYears, getStates, getTimeSeriesForState } = useEmendasData();
+  const { data, loading, getYears, getTimeSeriesForState, correlDados } = useEmendasData();
   const [selectedVariable, setSelectedVariable] = useState<string>('VL_Emendas_Parlamentares');
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -43,6 +43,10 @@ export default function PainelDados() {
     const validQL = latestData.filter(d => d.Quociente_Locacional_Cultura > 0);
     const avgQL = validQL.length ? validQL.reduce((acc, d) => acc + d.Quociente_Locacional_Cultura, 0) / validQL.length : 0;
 
+    // Empregos from correlDados (averages)
+    const totalEmprCriat = correlDados.reduce((acc, d) => acc + d.Media_Empregos_Criativos, 0);
+    const totalEmprBruto = correlDados.reduce((acc, d) => acc + d.Media_Empregos_Bruto, 0);
+
     const porRegiao = latestData.reduce((acc, d) => {
       if (!acc[d.Região]) acc[d.Região] = 0;
       acc[d.Região] += d.VL_Emendas_Parlamentares;
@@ -54,8 +58,8 @@ export default function PainelDados() {
       return { year: y, emendas: yd.reduce((a, d) => a + d.VL_Emendas_Parlamentares, 0) / 1e6 };
     });
 
-    return { totalEmendas, latestEmendas, growth, totalGastos, avgIDH, avgDesemp, avgQL, porRegiao, evolucao, latestYear };
-  }, [data, years, latestYear]);
+    return { totalEmendas, latestEmendas, growth, totalGastos, avgIDH, avgDesemp, avgQL, porRegiao, evolucao, latestYear, totalEmprCriat, totalEmprBruto };
+  }, [data, years, latestYear, correlDados]);
 
   // Map values
   const stateValues = useMemo(() => {
@@ -89,13 +93,15 @@ export default function PainelDados() {
   return (
     <div className="space-y-8">
       {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
         <StatCard title="Total de Emendas" value={`R$ ${(stats.totalEmendas / 1e9).toFixed(2)}B`} subtitle="Período completo" icon={TrendingUp} />
         <StatCard title={`Emendas ${stats.latestYear}`} value={`R$ ${(stats.latestEmendas / 1e6).toFixed(1)}M`} trendValue={`${stats.growth}%`} trend={Number(stats.growth) > 0 ? 'up' : 'down'} icon={Building2} />
         <StatCard title="Gastos com Cultura" value={`R$ ${(stats.totalGastos / 1e6).toFixed(1)}M`} subtitle={`${stats.latestYear}`} icon={Palette} />
         <StatCard title="IDH Educação Médio" value={stats.avgIDH.toFixed(3)} subtitle={`${stats.latestYear}`} icon={GraduationCap} />
         <StatCard title="Taxa de Desemprego" value={`${stats.avgDesemp.toFixed(1)}%`} subtitle={`Média ${stats.latestYear}`} icon={Users} />
         <StatCard title="QL Cultura Médio" value={stats.avgQL?.toFixed(4) || '—'} subtitle={`${stats.latestYear}`} icon={BarChart3} />
+        <StatCard title="Empregos Criativos" value={stats.totalEmprCriat.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} subtitle="Média do período" icon={Briefcase} />
+        <StatCard title="Empregos Total" value={stats.totalEmprBruto.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} subtitle="Média do período" icon={Briefcase} />
       </div>
 
       {/* Map section */}
@@ -124,7 +130,6 @@ export default function PainelDados() {
                 </div>
               </div>
 
-              {/* Selected state info */}
               {selectedState && (
                 <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 space-y-2">
                   <div className="flex items-center gap-2">
@@ -140,6 +145,19 @@ export default function PainelDados() {
                       <div className="text-xl font-bold text-primary">{variableInfo?.format(stateValues[selectedState])}</div>
                     </div>
                   )}
+                  {/* Show correl_dados info for the selected state */}
+                  {(() => {
+                    const corr = correlDados.find(c => c.Estado === selectedState);
+                    if (!corr) return null;
+                    return (
+                      <div className="space-y-1 mt-2">
+                        <div className="text-xs font-medium text-foreground">Médias do Período:</div>
+                        <div className="text-xs text-muted-foreground">Emendas: R$ {(corr.Media_Emenda_Periodo / 1e6).toFixed(2)}M</div>
+                        <div className="text-xs text-muted-foreground">Empregos Criativos: {corr.Media_Empregos_Criativos.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</div>
+                        <div className="text-xs text-muted-foreground">Empregos Bruto: {corr.Media_Empregos_Bruto.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}</div>
+                      </div>
+                    );
+                  })()}
                   <button onClick={() => setSelectedState('')} className="text-xs text-muted-foreground hover:text-foreground underline">
                     Limpar seleção
                   </button>
@@ -159,7 +177,6 @@ export default function PainelDados() {
             </div>
           </div>
 
-          {/* Time series for selected state */}
           {selectedState && timeSeries.length > 0 && (
             <div className="mt-6 bg-card border border-border/50 rounded-xl p-5">
               <h4 className="text-sm font-medium text-foreground mb-4">
@@ -249,8 +266,8 @@ export default function PainelDados() {
               <p className="text-sm text-muted-foreground">A distribuição das emendas mostra padrões de concentração que impactam o desenvolvimento equilibrado do país.</p>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium text-foreground">Investimento em Cultura</h4>
-              <p className="text-sm text-muted-foreground">Os gastos com cultura variam significativamente entre estados, refletindo diferentes prioridades orçamentárias.</p>
+              <h4 className="font-medium text-foreground">Empregos Criativos</h4>
+              <p className="text-sm text-muted-foreground">Os vínculos de empregos criativos apresentam grande variação entre estados, com concentração no Sudeste e Sul.</p>
             </div>
             <div className="space-y-2">
               <h4 className="font-medium text-foreground">Indicadores de Desenvolvimento</h4>
