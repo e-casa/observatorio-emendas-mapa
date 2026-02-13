@@ -152,6 +152,11 @@ export function LeafletMap({ stateValues, selectedState, onStateClick, variableL
     geoJsonLayerRef.current = layer;
   }, [geoData, stateValues, selectedState, maxValue, formatValue, variableLabel, onStateClick]);
 
+  const minValue = useMemo(() => {
+    const vals = Object.values(stateValues).filter(v => v > 0);
+    return vals.length ? Math.min(...vals) : 0;
+  }, [stateValues]);
+
   return (
     <div className="relative w-full">
       <div ref={mapRef} className="w-full h-[500px] rounded-xl overflow-hidden border border-border/50" />
@@ -165,8 +170,8 @@ export function LeafletMap({ stateValues, selectedState, onStateClick, variableL
           }} />
         </div>
         <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-          <span>Menor</span>
-          <span>Maior</span>
+          <span>{formatValue ? formatValue(minValue) : minValue.toLocaleString('pt-BR')}</span>
+          <span>{formatValue ? formatValue(maxValue) : maxValue.toLocaleString('pt-BR')}</span>
         </div>
       </div>
     </div>

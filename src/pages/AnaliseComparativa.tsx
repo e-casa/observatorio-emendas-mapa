@@ -176,7 +176,7 @@ export default function AnaliseComparativa() {
         <CardContent className="p-6">
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={comparisonData} layout="vertical" margin={{ left: 40 }}>
+              <BarChart data={comparisonData} layout="vertical" margin={{ left: 40, bottom: 20 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
                 <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(350, 15%, 45%)' }}
                   tickFormatter={v => {
@@ -185,22 +185,33 @@ export default function AnaliseComparativa() {
                     if (Math.abs(v) >= 1e3) return `${(v / 1e3).toFixed(1)}K`;
                     return v.toFixed(2);
                   }}
+                  label={{ value: varInfoX?.unit || xLabel, position: 'insideBottom', offset: -10, style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' } }}
                 />
-                <YAxis type="category" dataKey="estado" tick={{ fontSize: 10, fill: 'hsl(350, 15%, 45%)' }} width={40} />
+                <YAxis type="category" dataKey="estado" tick={{ fontSize: 10, fill: 'hsl(350, 15%, 45%)' }} width={40}
+                  label={{ value: 'Estado', angle: -90, position: 'insideLeft', offset: -30, style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' } }} />
                 <Tooltip content={({ active, payload }) => active && payload?.length ? (
                   <div className="bg-card border border-border rounded-lg shadow-lg p-3">
                     <p className="text-sm font-medium text-foreground">{payload[0].payload.fullName}</p>
-                    <p className="text-sm text-primary">{varInfoX?.format(payload[0].value as number)}</p>
-                    <p className="text-xs text-muted-foreground">{payload[0].payload.regiao}</p>
+                    <p className="text-sm text-primary">{xLabel}: {varInfoX?.format(payload[0].value as number)}</p>
+                    <p className="text-xs text-muted-foreground">Região: {payload[0].payload.regiao}</p>
                   </div>
                 ) : null} />
-                <Bar dataKey="x" radius={[0, 4, 4, 0]}>
+                <Bar dataKey="x" name={xLabel} radius={[0, 4, 4, 0]}>
                   {comparisonData.map((d, i) => (
                     <Cell key={i} fill={REGION_COLORS[d.regiao] || 'hsl(350, 65%, 35%)'} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          </div>
+          {/* Region color legend */}
+          <div className="flex flex-wrap gap-3 mt-3 justify-center">
+            {Object.entries(REGION_COLORS).map(([region, color]) => (
+              <div key={region} className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
+                <span className="text-xs text-muted-foreground">{region}</span>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

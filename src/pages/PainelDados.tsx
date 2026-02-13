@@ -40,6 +40,8 @@ export default function PainelDados() {
     const avgIDH = validIDH.length ? validIDH.reduce((acc, d) => acc + d.IDH_Educação, 0) / validIDH.length : 0;
     const validDesemp = latestData.filter(d => d.Taxa_de_Desemprego > 0);
     const avgDesemp = validDesemp.length ? validDesemp.reduce((acc, d) => acc + d.Taxa_de_Desemprego, 0) / validDesemp.length : 0;
+    const validQL = latestData.filter(d => d.Quociente_Locacional_Cultura > 0);
+    const avgQL = validQL.length ? validQL.reduce((acc, d) => acc + d.Quociente_Locacional_Cultura, 0) / validQL.length : 0;
 
     const porRegiao = latestData.reduce((acc, d) => {
       if (!acc[d.Região]) acc[d.Região] = 0;
@@ -52,7 +54,7 @@ export default function PainelDados() {
       return { year: y, emendas: yd.reduce((a, d) => a + d.VL_Emendas_Parlamentares, 0) / 1e6 };
     });
 
-    return { totalEmendas, latestEmendas, growth, totalGastos, avgIDH, avgDesemp, porRegiao, evolucao, latestYear };
+    return { totalEmendas, latestEmendas, growth, totalGastos, avgIDH, avgDesemp, avgQL, porRegiao, evolucao, latestYear };
   }, [data, years, latestYear]);
 
   // Map values
@@ -87,11 +89,13 @@ export default function PainelDados() {
   return (
     <div className="space-y-8">
       {/* Stats cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard title="Total de Emendas" value={`R$ ${(stats.totalEmendas / 1e9).toFixed(2)}B`} subtitle="Período completo" icon={TrendingUp} />
         <StatCard title={`Emendas ${stats.latestYear}`} value={`R$ ${(stats.latestEmendas / 1e6).toFixed(1)}M`} trendValue={`${stats.growth}%`} trend={Number(stats.growth) > 0 ? 'up' : 'down'} icon={Building2} />
+        <StatCard title="Gastos com Cultura" value={`R$ ${(stats.totalGastos / 1e6).toFixed(1)}M`} subtitle={`${stats.latestYear}`} icon={Palette} />
         <StatCard title="IDH Educação Médio" value={stats.avgIDH.toFixed(3)} subtitle={`${stats.latestYear}`} icon={GraduationCap} />
-        <StatCard title="Desemprego Médio" value={`${stats.avgDesemp.toFixed(1)}%`} subtitle={`${stats.latestYear}`} icon={Users} />
+        <StatCard title="Taxa de Desemprego" value={`${stats.avgDesemp.toFixed(1)}%`} subtitle={`Média ${stats.latestYear}`} icon={Users} />
+        <StatCard title="QL Cultura Médio" value={stats.avgQL?.toFixed(4) || '—'} subtitle={`${stats.latestYear}`} icon={BarChart3} />
       </div>
 
       {/* Map section */}
@@ -181,15 +185,17 @@ export default function PainelDados() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.evolucao}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
-                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }} />
-                  <YAxis tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }} tickFormatter={v => `${v.toFixed(0)}M`} />
+                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
+                    label={{ value: 'Ano', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' } }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }} tickFormatter={v => `${v.toFixed(0)}M`}
+                    label={{ value: 'R$ Milhões', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' } }} />
                   <Tooltip content={({ active, payload, label }) => active && payload?.length ? (
                     <div className="bg-card border border-border rounded-lg shadow-lg p-3">
-                      <p className="text-sm font-medium text-foreground">{label}</p>
+                      <p className="text-sm font-medium text-foreground">Ano: {label}</p>
                       <p className="text-sm text-primary">R$ {payload[0].value?.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}M</p>
                     </div>
                   ) : null} />
-                  <Bar dataKey="emendas" fill="hsl(350, 65%, 35%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="emendas" name="Emendas Parlamentares" fill="hsl(350, 65%, 35%)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -207,7 +213,10 @@ export default function PainelDados() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value">
+                  <Pie data={pieData} cx="45%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value"
+                    label={({ name, value }) => `${name}: R$${value.toFixed(0)}M`}
+                    labelLine={{ stroke: 'hsl(350, 15%, 65%)' }}
+                  >
                     {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
                   <Tooltip content={({ active, payload }) => active && payload?.length ? (
@@ -216,7 +225,8 @@ export default function PainelDados() {
                       <p className="text-sm text-primary">R$ {payload[0].payload.value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}M</p>
                     </div>
                   ) : null} />
-                  <Legend verticalAlign="middle" align="right" layout="vertical" wrapperStyle={{ fontSize: 12 }} />
+                  <Legend verticalAlign="bottom" align="center" layout="horizontal" wrapperStyle={{ fontSize: 12 }}
+                    formatter={(value: string) => <span className="text-xs text-foreground">{value}</span>} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
