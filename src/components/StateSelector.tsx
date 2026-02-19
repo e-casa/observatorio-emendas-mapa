@@ -35,7 +35,10 @@ export function StateSelector({
         <SelectTrigger className="w-full bg-card border-border">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent className="bg-card border-border max-h-[300px]">
+        <SelectContent className="bg-card border-border max-h-[300px] z-50">
+          <SelectItem value="all" className="cursor-pointer hover:bg-secondary font-medium">
+            Todos os estados
+          </SelectItem>
           {regionOrder.map(region => (
             <div key={region}>
               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50">

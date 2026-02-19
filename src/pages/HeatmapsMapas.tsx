@@ -4,6 +4,7 @@ import { CorrelationHeatmap } from '@/components/CorrelationHeatmap';
 import { LeafletMap } from '@/components/LeafletMap';
 import { VariableSelector } from '@/components/VariableSelector';
 import { RegionSelector } from '@/components/RegionSelector';
+import { StateSelector } from '@/components/StateSelector';
 import { VARIABLES, REGION_COLORS, STATES_INFO, CORRELATION_PAIRS, type EmendasData, type CorrelDadosRow } from '@/types/emendas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -27,6 +28,7 @@ export default function HeatmapsMapas() {
   const [mapVariable, setMapVariable] = useState<string>('Emendas_Per_Capita');
   const [mapYear, setMapYear] = useState<number | null>(null);
   const [heatmapRegion, setHeatmapRegion] = useState<string>('all');
+  const [heatmapState, setHeatmapState] = useState<string>('all');
 
   const years = getYears();
   const latestYear = years[years.length - 1];
@@ -101,11 +103,13 @@ export default function HeatmapsMapas() {
   // Heatmap from correl_dados (pre-computed correlations)
   const correlHeatmapData = useMemo(() => {
     let filtered = correlDados;
-    if (heatmapRegion && heatmapRegion !== 'all') {
+    if (heatmapState && heatmapState !== 'all') {
+      filtered = filtered.filter(c => c.Estado === heatmapState);
+    } else if (heatmapRegion && heatmapRegion !== 'all') {
       filtered = filtered.filter(c => c.Região === heatmapRegion);
     }
     return filtered;
-  }, [correlDados, heatmapRegion]);
+  }, [correlDados, heatmapRegion, heatmapState]);
 
   if (loading) {
     return (
@@ -125,8 +129,9 @@ export default function HeatmapsMapas() {
               <Grid3X3 className="w-5 h-5 text-primary" />
               Heatmap de Correlações (correl_dados)
             </CardTitle>
-            <div className="w-48">
-              <RegionSelector value={heatmapRegion} onValueChange={setHeatmapRegion} label="" placeholder="Todas" />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <RegionSelector value={heatmapRegion} onValueChange={(v) => { setHeatmapRegion(v); setHeatmapState('all'); }} label="" placeholder="Todas as regiões" />
+              <StateSelector value={heatmapState} onValueChange={(v) => { setHeatmapState(v); if (v !== 'all') { const info = STATES_INFO[Object.keys(STATES_INFO).find(k => k === v || STATES_INFO[k].abbr === v) || '']; if (info) setHeatmapRegion('all'); } }} label="" placeholder="Todos os estados" />
             </div>
           </div>
         </CardHeader>
