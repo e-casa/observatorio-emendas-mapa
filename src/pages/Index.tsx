@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Landmark, BarChart3, ArrowRightLeft, Grid3X3 } from 'lucide-react';
+import { Landmark, BarChart3, ArrowRightLeft, Grid3X3, Database } from 'lucide-react';
 import PainelDados from './PainelDados';
 import AnaliseComparativa from './AnaliseComparativa';
 import HeatmapsMapas from './HeatmapsMapas';
+import ExploradorVariaveis from './ExploradorVariaveis';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dados');
@@ -60,6 +61,11 @@ const Index = () => {
                 <Grid3X3 className="w-4 h-4" />
                 <span className="hidden sm:inline">Heatmaps & Mapas</span>
               </TabsTrigger>
+              <TabsTrigger value="explorador"
+                className="data-[state=active]:bg-primary/10 data-[state=active]:text-primary data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3 gap-2">
+                <Database className="w-4 h-4" />
+                <span className="hidden sm:inline">Explorador</span>
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -76,6 +82,9 @@ const Index = () => {
           </TabsContent>
           <TabsContent value="heatmaps" className="mt-0 animate-fade-in">
             <HeatmapsMapas />
+          </TabsContent>
+          <TabsContent value="explorador" className="mt-0 animate-fade-in">
+            <ExploradorVariaveis />
           </TabsContent>
         </Tabs>
       </main>

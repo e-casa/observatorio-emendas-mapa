@@ -36,12 +36,23 @@ export default function PainelDados() {
     const prevEmendas = prevData.reduce((acc, d) => acc + d.VL_Emendas_Parlamentares, 0);
     const growth = prevEmendas > 0 ? ((latestEmendas - prevEmendas) / prevEmendas * 100).toFixed(1) : '—';
     const totalGastos = latestData.reduce((acc, d) => acc + d.Gastos_Cultura, 0);
-    const validIDH = latestData.filter(d => d.IDH_Educação > 0);
-    const avgIDH = validIDH.length ? validIDH.reduce((acc, d) => acc + d.IDH_Educação, 0) / validIDH.length : 0;
-    const validDesemp = latestData.filter(d => d.Taxa_de_Desemprego > 0);
-    const avgDesemp = validDesemp.length ? validDesemp.reduce((acc, d) => acc + d.Taxa_de_Desemprego, 0) / validDesemp.length : 0;
-    const validQL = latestData.filter(d => d.Quociente_Locacional_Cultura > 0);
-    const avgQL = validQL.length ? validQL.reduce((acc, d) => acc + d.Quociente_Locacional_Cultura, 0) / validQL.length : 0;
+    // Find latest year with valid IDH data (2024 has no IDH)
+    const findLatestYearWithData = (field: keyof EmendasData) => {
+      for (let i = years.length - 1; i >= 0; i--) {
+        const yd = data.filter(d => d.Ano === years[i] && Number(d[field]) > 0);
+        if (yd.length > 0) return { year: years[i], data: yd };
+      }
+      return { year: latestYear, data: [] as typeof data };
+    };
+    const idhResult = findLatestYearWithData('IDH_Educação');
+    const avgIDH = idhResult.data.length ? idhResult.data.reduce((acc, d) => acc + d.IDH_Educação, 0) / idhResult.data.length : 0;
+    const idhYear = idhResult.year;
+    const desempResult = findLatestYearWithData('Taxa_de_Desemprego');
+    const avgDesemp = desempResult.data.length ? desempResult.data.reduce((acc, d) => acc + d.Taxa_de_Desemprego, 0) / desempResult.data.length : 0;
+    const desempYear = desempResult.year;
+    const qlResult = findLatestYearWithData('Quociente_Locacional_Cultura');
+    const avgQL = qlResult.data.length ? qlResult.data.reduce((acc, d) => acc + d.Quociente_Locacional_Cultura, 0) / qlResult.data.length : 0;
+    const qlYear = qlResult.year;
 
     // Empregos from correlDados (averages)
     const totalEmprCriat = correlDados.reduce((acc, d) => acc + d.Media_Empregos_Criativos, 0);
@@ -58,7 +69,7 @@ export default function PainelDados() {
       return { year: y, emendas: yd.reduce((a, d) => a + d.VL_Emendas_Parlamentares, 0) / 1e6 };
     });
 
-    return { totalEmendas, latestEmendas, growth, totalGastos, avgIDH, avgDesemp, avgQL, porRegiao, evolucao, latestYear, totalEmprCriat, totalEmprBruto };
+    return { totalEmendas, latestEmendas, growth, totalGastos, avgIDH, avgDesemp, avgQL, porRegiao, evolucao, latestYear, totalEmprCriat, totalEmprBruto, idhYear, desempYear, qlYear };
   }, [data, years, latestYear, correlDados]);
 
   // Map values
@@ -97,9 +108,9 @@ export default function PainelDados() {
         <StatCard title="Total de Emendas" value={`R$ ${(stats.totalEmendas / 1e9).toFixed(2)}B`} subtitle="Período completo" icon={TrendingUp} />
         <StatCard title={`Emendas ${stats.latestYear}`} value={`R$ ${(stats.latestEmendas / 1e6).toFixed(1)}M`} trendValue={`${stats.growth}%`} trend={Number(stats.growth) > 0 ? 'up' : 'down'} icon={Building2} />
         <StatCard title="Gastos com Cultura" value={`R$ ${(stats.totalGastos / 1e6).toFixed(1)}M`} subtitle={`${stats.latestYear}`} icon={Palette} />
-        <StatCard title="IDH Educação Médio" value={stats.avgIDH.toFixed(3)} subtitle={`${stats.latestYear}`} icon={GraduationCap} />
-        <StatCard title="Taxa de Desemprego" value={`${stats.avgDesemp.toFixed(1)}%`} subtitle={`Média ${stats.latestYear}`} icon={Users} />
-        <StatCard title="QL Cultura Médio" value={stats.avgQL?.toFixed(4) || '—'} subtitle={`${stats.latestYear}`} icon={BarChart3} />
+        <StatCard title="IDH Educação Médio" value={stats.avgIDH.toFixed(3)} subtitle={`${stats.idhYear}`} icon={GraduationCap} />
+        <StatCard title="Taxa de Desemprego" value={`${stats.avgDesemp.toFixed(1)}%`} subtitle={`Média ${stats.desempYear}`} icon={Users} />
+        <StatCard title="QL Cultura Médio" value={stats.avgQL?.toFixed(4) || '—'} subtitle={`${stats.qlYear}`} icon={BarChart3} />
         <StatCard title="Empregos Criativos" value={stats.totalEmprCriat.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} subtitle="Média do período" icon={Briefcase} />
         <StatCard title="Empregos Total" value={stats.totalEmprBruto.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} subtitle="Média do período" icon={Briefcase} />
       </div>
