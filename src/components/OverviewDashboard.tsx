@@ -115,27 +115,22 @@ export function OverviewDashboard() {
   const pieData = Object.entries(stats.emendasPorRegiao).map(([region, value]) => ({
     name: region,
     value: value / 1000000,
-    color: REGION_COLORS[region] || 'hsl(350, 30%, 50%)',
+    color: REGION_COLORS[region] || 'hsl(220, 30%, 50%)',
   }));
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-primary/10">
-            <Sparkles className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-foreground font-serif mb-2">
-              Visão Geral do Observatório
-            </h2>
-            <p className="text-muted-foreground">
-              Análise consolidada de <strong>{stats.totalStates} estados</strong> brasileiros, 
-              abrangendo <strong>{stats.totalYears} anos</strong> de dados sobre emendas parlamentares, 
-              indicadores socioeconômicos e investimentos em cultura.
-            </p>
-          </div>
+      <div className="bg-card border border-border rounded-lg p-5">
+        <div>
+          <h2 className="text-xl font-bold text-foreground mb-1">
+            Visão Geral do Observatório
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Análise consolidada de <strong>{stats.totalStates} estados</strong> brasileiros, 
+            abrangendo <strong>{stats.totalYears} anos</strong> de dados sobre emendas parlamentares, 
+            indicadores socioeconômicos e investimentos em cultura.
+          </p>
         </div>
       </div>
 
@@ -172,10 +167,9 @@ export function OverviewDashboard() {
       {/* Gráficos */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Evolução anual */}
-        <Card className="border-border/50 shadow-sm">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-serif">
-              <BarChart3 className="w-5 h-5 text-primary" />
+            <CardTitle className="text-base font-semibold">
               Evolução Anual das Emendas
             </CardTitle>
           </CardHeader>
@@ -183,13 +177,13 @@ export function OverviewDashboard() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.evolucaoAnual}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 88%)" />
                   <XAxis 
                     dataKey="year" 
-                    tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
+                    tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }}
                   />
                   <YAxis 
-                    tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
+                    tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }}
                     tickFormatter={(v) => `${v.toFixed(0)}M`}
                   />
                   <Tooltip
@@ -209,7 +203,7 @@ export function OverviewDashboard() {
                   />
                   <Bar 
                     dataKey="emendas" 
-                    fill="hsl(350, 65%, 35%)" 
+                    fill="hsl(220, 60%, 30%)" 
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
@@ -219,10 +213,9 @@ export function OverviewDashboard() {
         </Card>
 
         {/* Distribuição por região */}
-        <Card className="border-border/50 shadow-sm">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-serif">
-              <PieChartIcon className="w-5 h-5 text-primary" />
+            <CardTitle className="text-base font-semibold">
               Distribuição por Região ({stats.latestYear})
             </CardTitle>
           </CardHeader>
@@ -273,10 +266,9 @@ export function OverviewDashboard() {
       </div>
 
       {/* Top estados */}
-      <Card className="border-border/50 shadow-sm">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg font-serif">
-            <Users className="w-5 h-5 text-primary" />
+          <CardTitle className="text-base font-semibold">
             Top 5 Estados por Emendas ({stats.latestYear})
           </CardTitle>
         </CardHeader>
@@ -284,16 +276,16 @@ export function OverviewDashboard() {
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.topEstados} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 88%)" />
                 <XAxis 
                   type="number" 
-                  tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
+                  tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }}
                   tickFormatter={(v) => `R$ ${v.toFixed(1)}M`}
                 />
                 <YAxis 
                   type="category" 
                   dataKey="estado" 
-                  tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
+                  tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }}
                   width={120}
                 />
                 <Tooltip
@@ -313,7 +305,7 @@ export function OverviewDashboard() {
                 />
                 <Bar 
                   dataKey="valor" 
-                  fill="hsl(350, 65%, 35%)" 
+                  fill="hsl(220, 60%, 30%)" 
                   radius={[0, 4, 4, 0]}
                 />
               </BarChart>
@@ -323,10 +315,9 @@ export function OverviewDashboard() {
       </Card>
 
       {/* Insights */}
-      <Card className="border-border/50 shadow-sm bg-primary/5">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg font-serif">
-            <Sparkles className="w-5 h-5 text-primary" />
+          <CardTitle className="text-base font-semibold">
             Insights Principais
           </CardTitle>
         </CardHeader>

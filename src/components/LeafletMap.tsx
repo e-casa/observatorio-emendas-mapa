@@ -43,12 +43,12 @@ const GEOJSON_NAME_MAP: Record<string, string> = {
 };
 
 function getColor(value: number, max: number): string {
-  if (!value || !max) return '#f5e6e8';
+  if (!value || !max) return '#e8edf2';
   const ratio = Math.min(value / max, 1);
-  // Burgundy gradient
-  const r = Math.round(245 - ratio * 145);
-  const g = Math.round(230 - ratio * 200);
-  const b = Math.round(232 - ratio * 190);
+  // Navy gradient
+  const r = Math.round(232 - ratio * 182);
+  const g = Math.round(237 - ratio * 197);
+  const b = Math.round(242 - ratio * 142);
   return `rgb(${r},${g},${b})`;
 }
 
@@ -116,7 +116,7 @@ export function LeafletMap({ stateValues, selectedState, onStateClick, variableL
           fillColor: getColor(value, maxValue),
           weight: isSelected ? 3 : 1,
           opacity: 1,
-          color: isSelected ? 'hsl(350, 65%, 25%)' : '#fff',
+          color: isSelected ? 'hsl(220, 60%, 25%)' : '#fff',
           fillOpacity: isSelected ? 0.9 : 0.75,
         };
       },
@@ -159,14 +159,13 @@ export function LeafletMap({ stateValues, selectedState, onStateClick, variableL
 
   return (
     <div className="relative w-full">
-      <div ref={mapRef} className="w-full h-[500px] rounded-xl overflow-hidden border border-border/50" />
+      <div ref={mapRef} className="w-full h-[500px] rounded-lg overflow-hidden border border-border" />
       
-      {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-card/95 backdrop-blur-sm rounded-lg p-3 border border-border/50 shadow-md z-[1000]">
+      <div className="absolute bottom-4 right-4 bg-card rounded-lg p-3 border border-border z-[1000]">
         <div className="text-xs font-medium text-foreground mb-2">{variableLabel || 'Intensidade'}</div>
         <div className="flex items-center gap-1">
           <div className="w-full h-3 rounded" style={{
-            background: 'linear-gradient(to right, #f5e6e8, #c8505a, #641e28)'
+            background: 'linear-gradient(to right, #e8edf2, #4a6fa5, #1a2e50)'
           }} />
         </div>
         <div className="flex justify-between text-[10px] text-muted-foreground mt-1">

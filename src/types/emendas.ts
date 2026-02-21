@@ -190,9 +190,9 @@ export const STATES_INFO: Record<string, { name: string; region: string; abbr: s
 };
 
 export const REGION_COLORS: Record<string, string> = {
-  'Norte': 'hsl(120 45% 45%)',
-  'Nordeste': 'hsl(35 80% 50%)',
-  'Centro-Oeste': 'hsl(200 70% 50%)',
-  'Sudeste': 'hsl(350 65% 45%)',
-  'Sul': 'hsl(280 50% 55%)',
+  'Norte': 'hsl(160, 45%, 40%)',
+  'Nordeste': 'hsl(35, 70%, 50%)',
+  'Centro-Oeste': 'hsl(200, 60%, 45%)',
+  'Sudeste': 'hsl(220, 55%, 40%)',
+  'Sul': 'hsl(270, 40%, 50%)',
 };
