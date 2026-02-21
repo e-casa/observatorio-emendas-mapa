@@ -22,17 +22,15 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <div className={cn("stat-card", className)}>
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+      <div className="flex items-start justify-between mb-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</span>
         {Icon && (
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Icon className="w-4 h-4 text-primary" />
-          </div>
+          <Icon className="w-4 h-4 text-muted-foreground" />
         )}
       </div>
       
       <div className="space-y-1">
-        <h3 className="text-2xl font-bold text-foreground font-serif">
+        <h3 className="text-xl font-bold text-foreground tabular-nums">
           {value}
         </h3>
         
@@ -41,8 +39,8 @@ export function StatCard({
             {trendValue && (
               <span className={cn(
                 "text-xs font-medium px-1.5 py-0.5 rounded",
-                trend === 'up' && "bg-green-100 text-green-700",
-                trend === 'down' && "bg-red-100 text-red-700",
+                trend === 'up' && "bg-green-50 text-green-700 border border-green-200",
+                trend === 'down' && "bg-red-50 text-red-700 border border-red-200",
                 trend === 'neutral' && "bg-muted text-muted-foreground"
               )}>
                 {trend === 'up' && '↑'} {trend === 'down' && '↓'} {trendValue}

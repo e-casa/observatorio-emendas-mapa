@@ -50,25 +50,25 @@ export function ScatterPlot({ result, variableX, variableY }: ScatterPlotProps) 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-secondary/50 rounded-lg p-3">
           <div className="text-xs text-muted-foreground mb-1">Correlação (r)</div>
-          <div className="text-lg font-bold text-foreground font-serif">
+          <div className="text-lg font-bold text-foreground tabular-nums">
             {correlation.toFixed(4)}
           </div>
         </div>
         <div className="bg-secondary/50 rounded-lg p-3">
           <div className="text-xs text-muted-foreground mb-1">R²</div>
-          <div className="text-lg font-bold text-foreground font-serif">
+          <div className="text-lg font-bold text-foreground tabular-nums">
             {(rSquared * 100).toFixed(2)}%
           </div>
         </div>
         <div className="bg-secondary/50 rounded-lg p-3">
           <div className="text-xs text-muted-foreground mb-1">Força</div>
-          <div className="text-lg font-bold text-foreground font-serif capitalize">
+          <div className="text-lg font-bold text-foreground capitalize">
             {strength}
           </div>
         </div>
         <div className="bg-secondary/50 rounded-lg p-3">
           <div className="text-xs text-muted-foreground mb-1">Direção</div>
-          <div className="text-lg font-bold text-foreground font-serif capitalize">
+          <div className="text-lg font-bold text-foreground capitalize">
             {direction}
           </div>
         </div>
@@ -86,32 +86,32 @@ export function ScatterPlot({ result, variableX, variableY }: ScatterPlotProps) 
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 60, left: 60 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 88%)" />
             <XAxis 
               type="number" 
               dataKey="x" 
               name={xLabel}
-              tick={{ fontSize: 10, fill: 'hsl(350, 15%, 45%)' }}
+              tick={{ fontSize: 10, fill: 'hsl(220, 10%, 46%)' }}
               tickFormatter={formatAxis}
               label={{ 
                 value: xLabel, 
                 position: 'bottom',
                 offset: 40,
-                style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' }
+                style: { fontSize: 11, fill: 'hsl(220, 10%, 46%)' }
               }}
             />
             <YAxis 
               type="number" 
               dataKey="y" 
               name={yLabel}
-              tick={{ fontSize: 10, fill: 'hsl(350, 15%, 45%)' }}
+              tick={{ fontSize: 10, fill: 'hsl(220, 10%, 46%)' }}
               tickFormatter={formatAxis}
               label={{ 
                 value: yLabel, 
                 angle: -90, 
                 position: 'left',
                 offset: 45,
-                style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' }
+                style: { fontSize: 11, fill: 'hsl(220, 10%, 46%)' }
               }}
             />
             <ZAxis range={[60, 60]} />
@@ -136,7 +136,7 @@ export function ScatterPlot({ result, variableX, variableY }: ScatterPlotProps) 
             />
             <Scatter 
               data={points} 
-              fill="hsl(350, 65%, 35%)"
+              fill="hsl(220, 60%, 30%)"
               fillOpacity={0.7}
             />
             {/* Linha de tendência */}

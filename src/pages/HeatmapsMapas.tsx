@@ -11,7 +11,7 @@ import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend,
   ResponsiveContainer, Tooltip,
 } from 'recharts';
-import { Grid3X3, Map, TrendingUp, Radar as RadarIcon } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 function getHeatColor(r: number): string {
   if (r >= 0) {
@@ -120,22 +120,21 @@ export default function HeatmapsMapas() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Pre-computed Correlation Heatmap from correl_dados */}
-      <Card className="border-border/50 shadow-md">
-        <CardHeader className="border-b border-border/50">
+    <div className="space-y-6">
+      {/* Pre-computed Correlation Heatmap */}
+      <Card className="border-border">
+        <CardHeader className="border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle className="flex items-center gap-2 text-xl font-serif">
-              <Grid3X3 className="w-5 h-5 text-primary" />
-              Heatmap de Correlações (correl_dados)
+            <CardTitle className="text-base font-semibold">
+              Heatmap de Correlações
             </CardTitle>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <RegionSelector value={heatmapRegion} onValueChange={(v) => { setHeatmapRegion(v); setHeatmapState('all'); }} label="" placeholder="Todas as regiões" />
               <StateSelector value={heatmapState} onValueChange={(v) => { setHeatmapState(v); if (v !== 'all') { const info = STATES_INFO[Object.keys(STATES_INFO).find(k => k === v || STATES_INFO[k].abbr === v) || '']; if (info) setHeatmapRegion('all'); } }} label="" placeholder="Todos os estados" />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-5">
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
@@ -181,28 +180,26 @@ export default function HeatmapsMapas() {
         </CardContent>
       </Card>
 
-      {/* Calculated Correlation Matrix */}
-      <Card className="border-border/50 shadow-md">
-        <CardHeader className="border-b border-border/50">
-          <CardTitle className="flex items-center gap-2 text-xl font-serif">
-            <Grid3X3 className="w-5 h-5 text-primary" />
+      {/* Calculated Matrix */}
+      <Card className="border-border">
+        <CardHeader className="border-b border-border">
+          <CardTitle className="text-base font-semibold">
             Matriz de Correlação (calculada dos dados brutos)
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-5">
           <CorrelationHeatmap data={heatmapData} />
         </CardContent>
       </Card>
 
-      {/* Maps Section */}
-      <Card className="border-border/50 shadow-sm">
-        <CardHeader className="border-b border-border/50">
-          <CardTitle className="flex items-center gap-2 text-xl font-serif">
-            <Map className="w-5 h-5 text-primary" />
+      {/* Map */}
+      <Card className="border-border">
+        <CardHeader className="border-b border-border">
+          <CardTitle className="text-base font-semibold">
             Mapa Temático
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-5">
           <div className="grid lg:grid-cols-3 gap-6">
             <div className="space-y-4">
               <VariableSelector value={mapVariable} onValueChange={setMapVariable} label="Variável" />
@@ -219,14 +216,13 @@ export default function HeatmapsMapas() {
                 </div>
               </div>
 
-              {/* Ranking */}
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-primary" />
+                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
                   Ranking ({currentYear})
                 </h4>
                 {ranking.slice(0, 10).map(r => (
-                  <div key={r.estado} className="flex items-center justify-between p-2 bg-secondary/30 rounded-lg text-sm">
+                  <div key={r.estado} className="flex items-center justify-between p-2 bg-secondary/30 rounded text-sm">
                     <span className="flex items-center gap-2">
                       <span className="w-5 h-5 rounded-full bg-primary/10 text-primary text-[10px] font-bold flex items-center justify-center">{r.pos}</span>
                       <span className="font-mono text-xs text-muted-foreground">{r.estado}</span>
@@ -248,11 +244,10 @@ export default function HeatmapsMapas() {
         </CardContent>
       </Card>
 
-      {/* Radar Chart - Regional Profile */}
-      <Card className="border-border/50 shadow-sm">
+      {/* Radar */}
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl font-serif">
-            <RadarIcon className="w-5 h-5 text-primary" />
+          <CardTitle className="text-base font-semibold">
             Perfil Regional Comparativo ({latestYear})
           </CardTitle>
         </CardHeader>
@@ -260,8 +255,8 @@ export default function HeatmapsMapas() {
           <div className="h-96">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart data={radarData}>
-                <PolarGrid stroke="hsl(350, 20%, 85%)" />
-                <PolarAngleAxis dataKey="variable" tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }} />
+                <PolarGrid stroke="hsl(220, 13%, 85%)" />
+                <PolarAngleAxis dataKey="variable" tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }} />
                 <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 9 }} />
                 {regions.map(r => (
                   <Radar key={r} name={r} dataKey={r} stroke={REGION_COLORS[r]} fill={REGION_COLORS[r]} fillOpacity={0.15} strokeWidth={2} />

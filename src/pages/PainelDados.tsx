@@ -98,7 +98,7 @@ export default function PainelDados() {
   const pieData = Object.entries(stats.porRegiao).map(([region, value]) => ({
     name: region,
     value: value / 1e6,
-    color: REGION_COLORS[region] || 'hsl(350, 30%, 50%)',
+    color: REGION_COLORS[region] || 'hsl(220, 30%, 50%)',
   }));
 
   return (
@@ -116,10 +116,9 @@ export default function PainelDados() {
       </div>
 
       {/* Map section */}
-      <Card className="border-border/50 shadow-sm">
-        <CardHeader className="border-b border-border/50">
-          <CardTitle className="flex items-center gap-2 text-xl font-serif">
-            <MapPin className="w-5 h-5 text-primary" />
+      <Card className="border-border">
+        <CardHeader className="border-b border-border">
+          <CardTitle className="text-base font-semibold">
             Mapa de Variáveis por Estado
           </CardTitle>
         </CardHeader>
@@ -201,10 +200,10 @@ export default function PainelDados() {
 
       {/* Charts row */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <Card className="border-border/50 shadow-sm">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-serif">
-              <BarChart3 className="w-5 h-5 text-primary" />
+           <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <BarChart3 className="w-4 h-4 text-muted-foreground" />
               Evolução Anual das Emendas
             </CardTitle>
           </CardHeader>
@@ -212,28 +211,28 @@ export default function PainelDados() {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.evolucao}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
-                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
-                    label={{ value: 'Ano', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' } }} />
-                  <YAxis tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }} tickFormatter={v => `${v.toFixed(0)}M`}
-                    label={{ value: 'R$ Milhões', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 11, fill: 'hsl(350, 15%, 45%)' } }} />
+                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 88%)" />
+                  <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }}
+                    label={{ value: 'Ano', position: 'insideBottom', offset: -5, style: { fontSize: 11, fill: 'hsl(220, 10%, 46%)' } }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }} tickFormatter={v => `${v.toFixed(0)}M`}
+                    label={{ value: 'R$ Milhões', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 11, fill: 'hsl(220, 10%, 46%)' } }} />
                   <Tooltip content={({ active, payload, label }) => active && payload?.length ? (
                     <div className="bg-card border border-border rounded-lg shadow-lg p-3">
                       <p className="text-sm font-medium text-foreground">Ano: {label}</p>
                       <p className="text-sm text-primary">R$ {payload[0].value?.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}M</p>
                     </div>
                   ) : null} />
-                  <Bar dataKey="emendas" name="Emendas Parlamentares" fill="hsl(350, 65%, 35%)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="emendas" name="Emendas Parlamentares" fill="hsl(220, 60%, 30%)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 shadow-sm">
+        <Card className="border-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg font-serif">
-              <PieChartIcon className="w-5 h-5 text-primary" />
+           <CardTitle className="flex items-center gap-2 text-base font-semibold">
+              <PieChartIcon className="w-4 h-4 text-muted-foreground" />
               Distribuição por Região ({stats.latestYear})
             </CardTitle>
           </CardHeader>
@@ -243,7 +242,7 @@ export default function PainelDados() {
                 <PieChart>
                   <Pie data={pieData} cx="45%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value"
                     label={({ name, value }) => `${name}: R$${value.toFixed(0)}M`}
-                    labelLine={{ stroke: 'hsl(350, 15%, 65%)' }}
+                    labelLine={{ stroke: 'hsl(220, 10%, 65%)' }}
                   >
                     {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
@@ -263,10 +262,9 @@ export default function PainelDados() {
       </div>
 
       {/* Insights */}
-      <Card className="border-border/50 shadow-sm bg-primary/5">
+      <Card className="border-border">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg font-serif">
-            <Sparkles className="w-5 h-5 text-primary" />
+          <CardTitle className="text-base font-semibold">
             Insights Principais
           </CardTitle>
         </CardHeader>

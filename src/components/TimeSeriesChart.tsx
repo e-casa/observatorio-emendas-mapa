@@ -23,7 +23,7 @@ export function TimeSeriesChart({
   data, 
   variableKey, 
   title,
-  color = 'hsl(350, 65%, 35%)'
+  color = 'hsl(220, 60%, 30%)'
 }: TimeSeriesChartProps) {
   const variable = VARIABLES.find(v => v.key === variableKey);
   
@@ -57,19 +57,19 @@ export function TimeSeriesChart({
           <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={color} stopOpacity={0.2}/>
+                <stop offset="5%" stopColor={color} stopOpacity={0.15}/>
                 <stop offset="95%" stopColor={color} stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 88%)" />
             <XAxis 
               dataKey="year" 
-              tick={{ fontSize: 12, fill: 'hsl(350, 15%, 45%)' }}
-              axisLine={{ stroke: 'hsl(350, 20%, 88%)' }}
+              tick={{ fontSize: 12, fill: 'hsl(220, 10%, 46%)' }}
+              axisLine={{ stroke: 'hsl(220, 13%, 88%)' }}
             />
             <YAxis 
-              tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }}
-              axisLine={{ stroke: 'hsl(350, 20%, 88%)' }}
+              tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }}
+              axisLine={{ stroke: 'hsl(220, 13%, 88%)' }}
               tickFormatter={(value) => {
                 if (value >= 1000000000) return `${(value / 1000000000).toFixed(0)}B`;
                 if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
@@ -103,9 +103,9 @@ export function TimeSeriesChart({
               type="monotone"
               dataKey="value"
               stroke={color}
-              strokeWidth={3}
-              dot={{ fill: color, strokeWidth: 2, r: 4 }}
-              activeDot={{ r: 6, strokeWidth: 0 }}
+              strokeWidth={2}
+              dot={{ fill: color, strokeWidth: 2, r: 3 }}
+              activeDot={{ r: 5, strokeWidth: 0 }}
             />
           </ComposedChart>
         </ResponsiveContainer>

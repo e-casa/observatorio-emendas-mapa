@@ -63,7 +63,7 @@ export default function ExploradorVariaveis() {
   return (
     <div className="space-y-6">
       {/* Controls */}
-      <Card className="border-border/50 shadow-sm">
+      <Card className="border-border">
         <CardContent className="p-6">
           <div className="grid md:grid-cols-2 gap-6">
             <VariableSelector value={selectedVariable} onValueChange={setSelectedVariable} label="Variável para explorar" />
@@ -86,10 +86,9 @@ export default function ExploradorVariaveis() {
       {/* Map + Bar chart */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Map */}
-        <Card className="border-border/50 shadow-sm">
-          <CardHeader className="border-b border-border/50 pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg font-serif">
-              <MapPin className="w-5 h-5 text-primary" />
+        <Card className="border-border">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="text-base font-semibold">
               {variableInfo?.label} — Mapa ({currentYear})
             </CardTitle>
           </CardHeader>
@@ -105,10 +104,9 @@ export default function ExploradorVariaveis() {
         </Card>
 
         {/* Bar chart */}
-        <Card className="border-border/50 shadow-sm">
-          <CardHeader className="border-b border-border/50 pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg font-serif">
-              <BarChart3 className="w-5 h-5 text-primary" />
+        <Card className="border-border">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="text-base font-semibold">
               Top 15 Estados ({currentYear})
             </CardTitle>
           </CardHeader>
@@ -116,10 +114,10 @@ export default function ExploradorVariaveis() {
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData} layout="vertical" margin={{ left: 10, right: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(350, 20%, 88%)" />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(350, 15%, 45%)' }}
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 88%)" />
+                  <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(220, 10%, 46%)' }}
                     tickFormatter={v => variableInfo?.format(v) || String(v)} />
-                  <YAxis type="category" dataKey="name" width={35} tick={{ fontSize: 11, fill: 'hsl(350, 15%, 45%)' }} />
+                  <YAxis type="category" dataKey="name" width={35} tick={{ fontSize: 11, fill: 'hsl(220, 10%, 46%)' }} />
                   <Tooltip content={({ active, payload }) => active && payload?.length ? (
                     <div className="bg-card border border-border rounded-lg shadow-lg p-3">
                       <p className="text-sm font-medium text-foreground">{payload[0].payload.name}</p>
@@ -128,7 +126,7 @@ export default function ExploradorVariaveis() {
                   ) : null} />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {barData.map((entry, i) => (
-                      <Cell key={i} fill={REGION_COLORS[entry.region] || 'hsl(350, 65%, 35%)'} />
+                      <Cell key={i} fill={REGION_COLORS[entry.region] || 'hsl(220, 60%, 30%)'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -140,10 +138,9 @@ export default function ExploradorVariaveis() {
 
       {/* Time series for selected state */}
       {selectedState && (
-        <Card className="border-border/50 shadow-sm">
-          <CardHeader className="border-b border-border/50 pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg font-serif">
-              <TrendingUp className="w-5 h-5 text-primary" />
+        <Card className="border-border">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="text-base font-semibold">
               Evolução de {variableInfo?.label} — {selectedState}
             </CardTitle>
           </CardHeader>
@@ -157,10 +154,9 @@ export default function ExploradorVariaveis() {
       )}
 
       {/* Data table */}
-      <Card className="border-border/50 shadow-sm">
-        <CardHeader className="border-b border-border/50 pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg font-serif">
-            <Database className="w-5 h-5 text-primary" />
+      <Card className="border-border">
+        <CardHeader className="border-b border-border pb-3">
+          <CardTitle className="text-base font-semibold">
             Dados — {variableInfo?.label} ({currentYear})
           </CardTitle>
         </CardHeader>
