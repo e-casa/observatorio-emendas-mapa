@@ -18,7 +18,7 @@ export function useEmendasData() {
   useEffect(() => {
     async function loadData() {
       try {
-        const response = await fetch('/data/Base_Consolidada_Mestrado.xlsx');
+        const response = await fetch(`${import.meta.env.BASE_URL}data/Base_Consolidada_Mestrado.xlsx`);
         const arrayBuffer = await response.arrayBuffer();
         const workbook = XLSX.read(arrayBuffer, { type: 'array' });
 
