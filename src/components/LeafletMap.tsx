@@ -80,8 +80,14 @@ export function LeafletMap({ stateValues, selectedState, onStateClick, variableL
       zoom: 4,
       zoomControl: true,
       scrollWheelZoom: false,
-      attributionControl: false,
+      attributionControl: true,
     });
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 12,
+      minZoom: 3,
+    }).addTo(map);
 
     map.getContainer().style.background = 'hsl(var(--muted))';
 
