@@ -65,7 +65,7 @@ export function LeafletMap({ stateValues, selectedState, onStateClick, variableL
 
   // Load GeoJSON
   useEffect(() => {
-    fetch('/data/brazil-states.geojson')
+    fetch(`${import.meta.env.BASE_URL}data/brazil-states.geojson`)
       .then(r => r.json())
       .then(setGeoData)
       .catch(console.error);
@@ -83,10 +83,7 @@ export function LeafletMap({ stateValues, selectedState, onStateClick, variableL
       attributionControl: false,
     });
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-      maxZoom: 8,
-      minZoom: 3,
-    }).addTo(map);
+    map.getContainer().style.background = 'hsl(var(--muted))';
 
     mapInstanceRef.current = map;
 
